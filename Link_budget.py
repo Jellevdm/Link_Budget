@@ -128,7 +128,7 @@ def scint_loss (p_out, sigma_i):
     p_out: outage proability \\
     sigma_i: scintillation index
     """
-    L_sc = [3.3 - 5.77 * np.sqrt(-np.log(p_out))] * sigma_i ** (4/5)
+    L_sc = (3.3 - 5.77 * np.sqrt(-np.log(p_out))) * sigma_i ** (4/5)
     return L_sc
 #---------------------
 
@@ -181,12 +181,18 @@ Laser module --> Modulator --> Lens 1 --> Mirror 1 --> Beam splitter 1 --> ND fi
 # Constant parameters and assumed values
 #---------------------
 Tx_power = 1                            # Laser Power [W]
-wave_length = 1550e-9                   # Optical Laser wavelength [m]
-L = 2                                   # Distance Tx to Rx [m]
-theta_div = 20                          # Divergence angle [microrad]
+wave_length = 1                         # Optical Laser wavelength [m]
+L = 1                                   # Distance Tx to Rx [m]
+theta_div = 1                           # Divergence angle [microrad]
 Rx_treshold = 1
 T_atmos = 1
 r = 1 
+p0 = 0.1
+sigma_pj = 0.6
+scint_ind = 1
+D_spot = 1
+r0 = 1
+Drx = 1
 
 # Optical fibre, L1, M1, BS1, ND, M3, ND, BS1, M2, BS2, M4, L3 
 optics_array = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1] #FIXME: Still dummy
@@ -209,7 +215,7 @@ wave_front = wavefront_loss(D_spot, r0)
 Grx = Rx_gain(Drx, wave_length)
 #--
 total_losses = Gtx + optics_loss + Lfs + atmos_loss + sys_pl + total_jit + scint_loss + beam_spread + wave_front + Grx
-link_margin = total_losses + laser_power - Rx_treshold
+link_margin = total_losses + Tx_power - Rx_treshold
 print(f'Total losses: {total_losses} [dB]')
 print(f'Link margin: {link_margin} [dB]')
 #----------------
@@ -236,7 +242,7 @@ def system_tradeoff(geo_loss, L_pj, theta_div):
     plt.plot(theta_div, L_pj, label='Pointing Jitter loss')
     plt.plot(theta_div, comb, label='Combined performance')
     plt.grid()
-    plt.xlabel(f'Divergence Angle [\mu rad]')
+    plt.xlabel(f'Divergence Angle [$\mu rad$]')
     plt.ylabel(f'Link Losses [dB]')
     plt.legend()
     plt.show()
